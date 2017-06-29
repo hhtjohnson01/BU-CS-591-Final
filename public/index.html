@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Latest compiled and minified jQuery -->
+    <script src="https://code.jquery.com/jquery-2.2.3.js"
+            integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+    <!-- Angular (minified) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.2/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.2/angular-cookies.js"></script>
+
+    <!--Controllers for this page/app -->
+    <script src="javascripts/controllers.js"></script>
+    <!-- Local styles -->
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+
+
+</head>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnTweet').click(function (e) {
+            alert('Redirecting to Twitter');
+            var textToTweet = "#MMA #UFC #Bellator #WSOF #LocalMMA #InvictaFC";
+            if (textToTweet.length > 140) {
+                alert('Tweet should be less than 140 Chars');
+            }
+            else {
+                var twtLink = 'http://twitter.com/home?status=' +encodeURIComponent(textToTweet);
+                window.open(twtLink,'_blank');
+            }
+        });
+    });
+
+</script>
+<style type="text/css">
+    #btnTweet {
+        width: 159px;
+        height: 38px;
+    }
+</style>
+<style>
+    body, h1, h2, h3, h4, h5 {
+        font-family: "Poppins", sans-serif
+    }
+
+    body {
+        font-size: 16px;
+    }
+
+    .w3-half img {
+        margin-bottom: -6px;
+        margin-top: 16px;
+        opacity: 0.8;
+        cursor: pointer
+    }
+
+    .w3-half img:hover {
+        opacity: 1
+    }
+</style>
+<body ng-app="FighterFeed">
+
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;"
+     id="mySidebar"><br>
+    <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft"
+       style="width:100%;font-size:22px">Close Menu</a>
+    <div class="w3-container">
+        <img src="./images/FF%20Logos/White.png" style="width: 60%">
+    </div>
+    <div class="w3-bar-block">
+        <a href="#login_out" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Login/Logout</a>
+        <a href="#fighterSearch" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Fighters</a>
+        <a href="#where" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Where to Watch</a>
+        <a href="#thefeed" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">The #Feed</a>
+        <a href="#other" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Other</a>
+    </div>
+</nav>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:340px;margin-right:40px" ng-init="initApp()">
+
+    <!-- Website header and Authorization handler-->
+    <div class="w3-container" style="margin-top:80px" id="login_out" title="Login" ng-controller="mainctrl"
+         ng-init="initApp()">
+        <img src="./images/FF%20Logos/Logo2.png" style="width: inherit" align="center">
+
+        <h1 class="w3-xxxlarge w3-text-red"><b>Authorization.</b></h1>
+        <hr style="width:50px;border:5px solid red" class="w3-round">
+
+        <div ng-show="showLogin">
+            Name: <input type="text" ng-model="name">
+            Email: <input type="text" ng-model="email">
+            Password: <input type="password" ng-model="password">
+            <button class="btn btm-sm" ng-click="login()">Log in</button>
+            <button class="btn btm-sm" ng-click="register()">Register</button>
+
+        </div>
+        <div ng-hide="authorized">
+            <br/>
+            <input type="image" src="./images/FF%20Logos/Twitter.png" ng-click="doTwitterAuth()">
+        </div>
+        <br/>
+        <div ng-show="authorized">
+            <button class="btn btn-sm" ng-click="logout()">Log out</button>
+        </div>
+
+        <!-- Fighter search and result display. Hidden until authorized.-->
+        <div class="w3-container" id="fighterSearch" style="margin-top:75px" title="Fighter"
+             ng-controller="fighterController">
+            <h1 class="w3-xxxlarge w3-text-red"><b>Search.</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <div class="w3-col m6 w3-white w3-center" ng-show="authorized">
+                <div>
+                    Search for a fighter: <input type="text" ng-model="fighter" placeholder="Fighter's Name" required>
+                    <button class="w3-button w3-block w3-blue w3-section w3-padding" ng-click="getFighter()">
+                        Find Your Fighter!
+                    </button>
+                    <br/>
+
+                    <ul class="list-group">
+                        <li class="list-group-item largeText">
+                        <span ng-show="display" style="width: 50%" ng-model="fighter">
+
+                        </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Map of nearby bars -->
+        <div class="w3-container" id="where" style="margin-top:75px">
+            <h1 class="w3-xxxlarge w3-text-red"><b>Where to Watch</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <div class="w3-col m6 w3-white w3-center">
+                Click on locations on the map to get names of nearby sports-bars.
+                <div id="map" style="width:500px; height:500px"></div>
+            </div>
+
+        </div>
+
+        <!-- THE FEED (Twitter feeds from different MMA hashtags). Hidden if you are not authorized-->
+        <div class="w3-container" id="thefeed" style="margin-top:75px">
+            <h1 class="w3-xxxlarge w3-text-red"><b>The #FEED.</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <div class="w3-row w3-container" style="width: auto" ng-show="authorized">
+                <!-- Tweet with my MMA hashtags from linked Twitter account-->
+                <button id="btnTweet">Tweet</button>
+                <br>
+                <div class="w3-row" ng-hide="myVar">
+                    <!-- Custom widget gets all results containing #MMMA-->
+                    <div class="w3-col m2 w3-green w3-center">
+                        <a class="twitter-timeline" href="https://twitter.com/hashtag/MMA"
+                           data-widget-id="876814135375388673">#MMA
+                            Tweets</a>
+                        <script>!function (d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
+                            if (!d.getElementById(id)) {
+                                js = d.createElement(s);
+                                js.id = id;
+                                js.src = p + "://platform.twitter.com/widgets.js";
+                                fjs.parentNode.insertBefore(js, fjs);
+                            }
+                        }(document, "script", "twitter-wjs");</script>
+                    </div>
+                    <!-- Custom widget gets all results containing #UFC-->
+                    <div class="w3-col m2 w3-red w3-center">
+                        <a class="twitter-timeline" href="https://twitter.com/hashtag/UFC"
+                           data-widget-id="877540762711404544">#UFC
+                            Tweets</a>
+                        <script>!function (d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
+                            if (!d.getElementById(id)) {
+                                js = d.createElement(s);
+                                js.id = id;
+                                js.src = p + "://platform.twitter.com/widgets.js";
+                                fjs.parentNode.insertBefore(js, fjs);
+                            }
+                        }(document, "script", "twitter-wjs");</script>
+                    </div>
+                    <!-- Custom widget gets all results containing #BellatorMMMA-->
+                    <div class="w3-col m2 w3-blue w3-center">
+                        <a class="twitter-timeline" href="https://twitter.com/hashtag/BellatorMMA"
+                           data-widget-id="878296118307819520">#BellatorMMA Tweets</a>
+                        <script>!function (d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
+                            if (!d.getElementById(id)) {
+                                js = d.createElement(s);
+                                js.id = id;
+                                js.src = p + "://platform.twitter.com/widgets.js";
+                                fjs.parentNode.insertBefore(js, fjs);
+                            }
+                        }(document, "script", "twitter-wjs");</script>
+                    </div>
+                    <!-- Custom widget gets all results containing #WSOF-->
+                    <div class="w3-col m2 w3-dark-grey w3-center">
+                        <a class="twitter-timeline" href="https://twitter.com/hashtag/WSOF"
+                           data-widget-id="878296273878732801">#WSOF
+                            Tweets</a>
+                        <script>!function (d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
+                            if (!d.getElementById(id)) {
+                                js = d.createElement(s);
+                                js.id = id;
+                                js.src = p + "://platform.twitter.com/widgets.js";
+                                fjs.parentNode.insertBefore(js, fjs);
+                            }
+                        }(document, "script", "twitter-wjs");</script>
+                    </div>
+                    <!-- Custom widget gets all results containing #localMMMA-->
+                    <div class="w3-col m2 w3-orange w3-center">
+                        <a class="twitter-timeline" href="https://twitter.com/hashtag/localMMA"
+                           data-widget-id="878460128160350208">#localMMA Tweets</a>
+                        <script>!function (d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
+                            if (!d.getElementById(id)) {
+                                js = d.createElement(s);
+                                js.id = id;
+                                js.src = p + "://platform.twitter.com/widgets.js";
+                                fjs.parentNode.insertBefore(js, fjs);
+                            }
+                        }(document, "script", "twitter-wjs");</script>
+
+                    </div>
+                    <!-- Custom widget gets all results containing #InvictaFC-->
+                    <div class="w3-col m2 w3-pink w3-center">
+                        <a class="twitter-timeline" href="https://twitter.com/hashtag/InvictaFC"
+                           data-widget-id="879016938130767872">#InvictaFC Tweets</a>
+                        <script>!function (d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
+                            if (!d.getElementById(id)) {
+                                js = d.createElement(s);
+                                js.id = id;
+                                js.src = p + "://platform.twitter.com/widgets.js";
+                                fjs.parentNode.insertBefore(js, fjs);
+                            }
+                        }(document, "script", "twitter-wjs");</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Other links, just for fun for people to read/watch/learn more about the sport. -->
+        <div class="w3-container" id="other" style="margin-top:75px">
+            <h1 class="w3-xxxlarge w3-text-red"><b>Other.</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <p>
+                <a href="https://en.wikipedia.org/wiki/Mixed_martial_arts" class="w3-bar-item w3-button">History</a>
+                <a href="./images/FF%20Logos/MMA_video.mp4" class="w3-bar-item w3-button">Video</a>
+                <a href="http://www.sherdog.com" class="w3-bar-item w3-button">Sherdog</a>
+                <a href="https://www.mmafighting.com" class="w3-bar-item w3-button">MMA Fighting</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<!-- W3.CSS Container -->
+<div class="w3-light-grey w3-container w3-padding-32" style="margin-top:75px;padding-right:58px"><p class="w3-right">
+    Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank"
+                  class="w3-hover-opacity">w3.css</a></p></div>
+
+<script>
+    // Script to open and close sidebar
+    function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("myOverlay").style.display = "block";
+    }
+
+    function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("myOverlay").style.display = "none";
+    }
+
+</script>
+<script>
+
+    let map;
+    let infoWindow;
+    let loc;
+
+    //Initializes the map, tinkering with Google's Try Me code for Geolocation and Places APIs.
+    function initMap() {
+
+        //Handles geolocation and finding location of the device. Permission must be granted for this.
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+
+                loc = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                }
+
+                let myLocation = loc;
+
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: myLocation,
+                    zoom: 15
+                });
+                infoWindow = new google.maps.InfoWindow({
+                    map: map
+                });
+                infoWindow.setPosition(loc);
+                infoWindow.setContent('Location found.');
+                map.setCenter(loc);
+
+                //Places finds all the bars (because they could play a big MMA event) in a given radius.
+                let service = new google.maps.places.PlacesService(map);
+                service.nearbySearch({
+                    location: myLocation,
+                    radius: 650,
+                    types: ['bar']
+                }, callback);
+            })
+        }
+    }
+
+    //Necessary Callback for places
+    function callback(results, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            for (var i = 0; i < results.length; i++) {
+                createMarker(results[i]);
+            }
+        }
+    }
+
+    //Creates all the nice markers on the map that are the results
+    function createMarker(place) {
+        let placeLoc = place.geometry.location;
+        let marker = new google.maps.Marker({
+            map: map,
+            position: placeLoc
+        });
+
+        google.maps.event.addListener(marker, 'click', function () {
+            infoWindow.setContent('<div><strong>' + place.name + '</strong><br>' +
+                'Place ID: ' + place.place_id + '</div>');
+            infoWindow.open(map, this);
+        });
+    }
+
+    initMap();
+</script>
+
+<!----This is needed to execute the code for the map. Google api key abstracted away.---->
+<script src="https://maps.googleapis.com/maps/api/js?key={{Google.API_KEY}}&libraries=places&callback=initMap"
+        async defer></script>
+
+</body>
+</html>
+
